@@ -1,7 +1,8 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { view_post, edit_post } from '../utils/constants';
+import { useDispatch, useSelector } from 'react-redux';
+import { editPost, viewPost } from '../redux/postsDucks';
 import Swal from 'sweetalert2';
 
 const Toast = Swal.mixin({
@@ -20,29 +21,20 @@ function EditPost(){
 
     const { id } = useParams();
 
-    const [post, setPost] = useState({
+    const dispatch = useDispatch();
+    const post = useSelector(store => store.posts.data);    
+
+    const [newPost, setNewPost] = useState({
         id: null,
         title: null, 
         body: null
     })
 
-    const { register, errors, handleSubmit } = useForm();
-
-    const getPost = async(id) => {
-        await fetch(view_post + id)
-        .then(response => response.json())
-        .then(json => {
-            setPost({
-                id: json.id,
-                title: json.title,
-                body: json.body
-            })
-        });
-    }
+    const { register, errors, handleSubmit } = useForm();    
 
     const handleChange = (e) => {
-        setPost({
-            ...post,
+        setNewPost({
+            ...newPost,
             [e.target.name]: e.target.value
         });
     }  
@@ -51,21 +43,17 @@ function EditPost(){
         e.preventDefault();
         e.target.reset()
         if(data){
-            await fetch(edit_post + post.id)
-            .then(response => response.json())
-            .then(json => {
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Post edited'
-                })
-                console.log(json)
+            dispatch(editPost(data, post.id))
+            Toast.fire({
+                icon: 'success',
+                title: 'Post edited'
             })
         }
     }
     
     useEffect(() => {
-        getPost(id);
-    }, [id])
+        dispatch(viewPost(id));
+    })
 
     return(
         <Fragment>

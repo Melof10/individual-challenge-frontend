@@ -1,6 +1,7 @@
 import React, { useState, Fragment } from 'react';
 import { useForm } from 'react-hook-form';
-import { add_post } from '../utils/constants';
+import { useDispatch } from 'react-redux';
+import { addPost } from '../redux/postsDucks';
 import Swal from 'sweetalert2';
 
 const Toast = Swal.mixin({
@@ -16,6 +17,8 @@ const Toast = Swal.mixin({
 })
 
 function NewPost(){
+
+    const dispatch = useDispatch();    
 
     const [post, setPost] = useState({
         title: null,
@@ -35,14 +38,10 @@ function NewPost(){
         e.preventDefault();
         e.target.reset();
         if(data){
-            await fetch(add_post)
-            .then(response => response.json())
-            .then(json => {
-                console.log(json);
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Post created'
-                })
+            dispatch(addPost(data));
+            Toast.fire({
+                icon: 'success',
+                title: 'Post created'
             })
         }        
     }

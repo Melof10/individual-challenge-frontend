@@ -1,24 +1,17 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useEffect, Fragment } from 'react';
 import { useParams } from 'react-router-dom';
-import { view_post } from '../utils/constants';
+import { useDispatch, useSelector } from 'react-redux';
+import { viewPost } from '../redux/postsDucks';
 
 function ViewPost(){
     const { id } = useParams();
 
-    const [data, setData] = useState([]);
-
-    const viewPost = async(id) => {
-        await fetch(view_post + id)
-        .then(response => response.json())
-        .then(json => {
-            console.log(json)
-            setData(json);
-        })
-    }
+    const dispatch = useDispatch();
+    const post = useSelector(store => store.posts.data);    
 
     useEffect(() => {
-        viewPost(id);
-    }, [id])
+        dispatch(viewPost(id))
+    })
 
     return(
         <Fragment>                 
@@ -26,11 +19,11 @@ function ViewPost(){
                 <div className="card-body">
                     <div className="col-12">
                         <div className="d-flex justify-content-between mb-5">
-                            <h6 className="font-weight-bold">ID: {data.id}</h6>
-                            <h6 className="font-weight-bold">USER ID: {data.userId}</h6>
+                            <h6 className="font-weight-bold">ID: {post.id}</h6>
+                            <h6 className="font-weight-bold">USER ID: {post.userId}</h6>
                         </div>
-                        <h5 className="text-center font-weight-bold mb-5">{data.title}</h5>
-                        <p className="h5 mb-3">{data.body}</p>
+                        <h5 className="text-center font-weight-bold mb-5">{post.title}</h5>
+                        <p className="h5 mb-3">{post.body}</p>
                     </div>
                 </div>
             </div>

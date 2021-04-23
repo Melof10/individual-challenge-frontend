@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import MaterialTable from '@material-table/core';
-import { posts, delete_post } from '../utils/constants';
 import { useHistory } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { getPosts, deletePost } from '../redux/postsDucks';
 import Swal from 'sweetalert2';
 
 const Toast = Swal.mixin({
@@ -16,10 +17,12 @@ const Toast = Swal.mixin({
     }
 })  
 
-function Home(){
+const Home = () => {
 
-    const history = useHistory();
-    const [data, setData] = useState([]);
+    const dispatch = useDispatch();
+    const posts = useSelector(store => store.posts.data);    
+
+    const history = useHistory();    
 
     const columns = [
         {
@@ -34,58 +37,43 @@ function Home(){
             cellStyle: { textAlign: 'left', width: '80%' }, 
             headerStyle: { textAlign: 'left' }  
         }
-    ];
-
-    const getPosts = async() => {
-        await fetch(posts)
-        .then(response => response.json())
-        .then(json => setData(json));        
-    }
-
-    const deletePost = async(id) => {
-        await fetch(delete_post + id)
-        .then(response => response.json())
-        .then(json => {
-            console.log(json)               
-            getPosts();
-            Toast.fire({
-                icon: 'success',
-                title: 'Post deleted'
-            })
-        });        
-    }
+    ];    
 
     useEffect(() => {              
-        getPosts();
-    }, [])
+        dispatch(getPosts());                 
+    })
     
-
     return(
-        <div className="col-md-10 mt-5">
+        <div className="col-md-10 mt-5">            
             <MaterialTable                                
                 columns={columns}
-                data={data}                                
+                data={posts}                                
                 title="POSTS" 
                 editable={{                                            
                     onRowDelete: oldData =>
                         new Promise((resolve, reject) => {
                             setTimeout(() => {
-                                deletePost(oldData.id);
                                 resolve();
+                                dispatch(deletePost(oldData.id));                                
+                                dispatch(getPosts());
+                                Toast.fire({
+                                    icon: 'success',
+                                    title: 'Post deleted'
+                                })
                             }, 1000)
                         })
                 }}
                 actions={[
                     {
                         icon: 'visibility',
-                        tooltip: 'View User',
+                        tooltip: 'View Post',
                         onClick: (event, rowData) => {  
                             history.push('/posts/' + rowData.id)
                         }
                     },
                     {
                         icon: 'edit',
-                        tooltip: 'Edit User',
+                        tooltip: 'Edit Post',
                         onClick: (event, rowData) => {
                             history.push('/posts/edit/' + rowData.id)
                         }
